@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminPegawaiController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenggajianController;
@@ -67,3 +68,12 @@ Route::controller(CutiController::class)->group(function(){
 
 });
 
+Route::prefix('admin')->group(function() {
+    Route::prefix('pegawai')->group(function(){
+        Route::controller(AdminPegawaiController::class)->group(function(){
+            Route::post('', 'getPegawai');
+            Route::post('/add', 'addPegawai');
+            Route::get('/image/{id}', 'getPhotoByPegawaiId');
+        });
+    });
+});

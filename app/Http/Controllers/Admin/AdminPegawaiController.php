@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Divisi;
+use App\Models\Pegawai;
+use App\Models\User;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Intervention\Image\ImageManagerStatic as Image;
+
+use function PHPUnit\Framework\isEmpty;
+
+class AdminPegawaiController extends Controller
+{
+
+    public function getPegawai(Request $request)
+    {
+        if($request['id_pegawai'] == null){
+            // get all pegawai
+            $allPegawai = Pegawai::select('*')->get()->map(function ($pegawai){
+                $pegawai = collect($pegawai)->except('foto_profil');
+                $pegawai['foto_profil'] = "admin/pegawai/image/" . $pegawai['id_pegawai'];
+                return $pegawai;
+            });
+            return response()->json($allPegawai, 200);
+        }else{
+            // get pegawai by id
+            $pegawai = Pegawai::find($request['id_pegawai']);
+            $pegawai['foto_profil'] = "admin/pegawai/image/" . $pegawai['id_pegawai'];
+            return response()->json($pegawai, 200);
+        }
+    }
+
+    public function addPegawai(Request $request){
+        try {
+            $this->validate($request, [
+                'id_user' => 'required|integer',
+                'foto_profil' => 'required|file|mimes:jpg,png,jpeg,gif,svg|max:10000',
+                'alamat_pegawai' => 'required|string|max:250',
+                'nohp_pegawai' => 'required|string|max:14',
+                'nip' => 'required|string|max:20',
+                'id_divisi' => 'required|integer'
+            ]);
+
+            $image = $request->file('foto_profil');
+            $img = Image::make($image->getRealPath());
+
+            // Menyesuaikan ukuran gambar ke ukuran tetap
+            $img->fit(250, 250);
+            $imageData = $img->encode();
+
+            // Simpan BLOB ke kolom 'foto_profil' di tabel 'Pegawai' dengan ID 1
+            // DB::table('pegawai')
+            //     ->where('id_pegawai', $request['id_pegawai'])
+            //     ->update(['foto_profil' => $imageData]);
+            $newPegawai = new Pegawai();
+            $newPegawai['id_user'] = $request['id_user'];
+            $newPegawai['alamat_pegawai'] = $request['alamat_pegawai'];
+            $newPegawai['nohp_pegawai'] = $request['nohp_pegawai'];
+            $newPegawai['nip'] = $request['nip'];
+            $newPegawai['id_divisi'] = $request['id_divisi'];
+            $newPegawai['foto_profil'] = $imageData;
+            $newPegawai->save();
+            $newPegawai['foto_profil'] = "admin/pegawai/image/". $newPegawai['id_pegawai'];
+
+            return response($newPegawai, Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            //throw $th;`
+            return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function getPhotoByPegawaiId($pegawaiId)
+    {
+        $pegawai = Pegawai::find($pegawaiId);
+
+        if ($pegawai) {
+            $fotoBlob = $pegawai->foto_profil;
+
+            if ($fotoBlob) {
+                header('Content-Type: image/jpeg');
+
+                echo $fotoBlob;
+            } else {
+                $defaultImage = public_path('image/no_pict.png');
+                if (file_exists($defaultImage)) {
+                    header('Content-Type: image/jpeg');
+                    readfile($defaultImage);
+                }
+            }
+        }
+    }
+}

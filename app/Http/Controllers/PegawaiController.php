@@ -58,29 +58,6 @@ class PegawaiController extends Controller
         }
     }
 
-    // public function imageStore(Request $request)
-    // {
-
-    //     try {
-    //         $this->validate($request, [
-    //             'id_pegawai' => 'required|integer',
-    //             'image' => 'required|file|mimes:jpg,png,jpeg,gif,svg|max:2048',
-    //         ]);
-
-    //         $image = $request->file('image');
-    //         $imageData = file_get_contents($image->getRealPath());
-
-    //         // Simpan BLOB ke kolom 'foto_profil' di tabel 'Pegawai' dengan ID 1
-    //         DB::table('pegawai')
-    //             ->where('id_pegawai', $request['id_pegawai'])
-    //             ->update(['foto_profil' => $imageData]);
-    //         return response(["message" => "Berhasil"], 200);
-    //     } catch (Exception $e) {
-    //         // Tangani pengecualian jika berkas tidak sesuai format
-    //         return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-    //     }
-    // }
-
     public function imageStore(Request $request)
     {
 
@@ -109,7 +86,7 @@ class PegawaiController extends Controller
         }
     }
 
-    
+
 
     public function updateProfile(Request $request)
     {
@@ -119,7 +96,6 @@ class PegawaiController extends Controller
             'email_user' => 'nullable|email',
             'nohp_pegawai' => 'nullable',
         ]);
-        error_log("testtt". $request);
         try {
             $pegawai = Pegawai::where('id_user', $data['id_user'])->update([
                 'alamat_pegawai' => $data['alamat_pegawai'],
@@ -133,10 +109,10 @@ class PegawaiController extends Controller
             error_log("testtt2");
             return response()->json(["message" => "Berhasil menyimpan profil"], 200);
         } catch (Exception $ex) {
-  
+
             return response("Gagal: " . $ex->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
 
-    
+
 }
