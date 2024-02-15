@@ -3,17 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Divisi;
 use App\Models\Pegawai;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Intervention\Image\ImageManagerStatic as Image;
 
-use function PHPUnit\Framework\isEmpty;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class AdminPegawaiController extends Controller
 {

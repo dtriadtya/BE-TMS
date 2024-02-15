@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminPegawaiController;
+use App\Http\Controllers\Admin\AdminPenggajianController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenggajianController;
@@ -76,6 +77,14 @@ Route::prefix('admin')->group(function() {
             Route::post('/update', 'updatePegawai');
             Route::post('/remove', 'removePegawai');
             Route::get('/image/{id}', 'getPhotoByPegawaiId');
+        });
+    });
+
+    Route::prefix('penggajian')->group(function(){
+        Route::controller(AdminPenggajianController::class)->group(function(){
+            Route::post('', 'getPenggajian');
+            Route::post('/add', 'addPenggajian');
+            Route::post('/remove', 'removePenggajian');
         });
     });
 });
