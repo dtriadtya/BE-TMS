@@ -74,6 +74,7 @@ Route::prefix('admin')->group(function() {
             Route::post('', 'getPegawai');
             Route::post('/add', 'addPegawai');
             Route::post('/update', 'updatePegawai');
+            Route::post('/remove', 'removePegawai');
             Route::get('/image/{id}', 'getPhotoByPegawaiId');
         });
     });

@@ -111,6 +111,26 @@ class AdminPegawaiController extends Controller
             return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function removePegawai(Request $request){
+        try {
+            $this->validate($request, [
+                'id_pegawai' => 'required|integer'
+            ]);
+
+            $pegawai = Pegawai::find($request['id_pegawai']);
+            if(!$pegawai){
+                return response()->json(['message' => 'Data not found'], 404);
+            }
+
+            $pegawai->delete();
+
+            return response()->json(['message' => 'Data deleted successfully'], 200);
+        } catch (Exception $e) {
+            //throw $th;`
+            return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
     public function getPhotoByPegawaiId($pegawaiId)
     {
         $pegawai = Pegawai::find($pegawaiId);
