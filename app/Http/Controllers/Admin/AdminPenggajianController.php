@@ -41,6 +41,7 @@ class AdminPenggajianController extends Controller
                 'bonus' => 'required|integer',
                 'tanggal' => 'required|date_format:Y-m-d H:i:s'
             ]);
+
             $newPenggajian = new Penggajian();
             $newPenggajian['id_user'] = $request['id_user'];
             $newPenggajian['gaji_pokok'] = $request['gaji_pokok'];
@@ -54,6 +55,27 @@ class AdminPenggajianController extends Controller
             $newPenggajian->save();
 
             return response()->json($newPenggajian, 200);
+        } catch (Exception $e) {
+            //throw $th;`
+            return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function removePenggajian(Request $request){
+        try {
+            $this->validate($request, [
+                'id_penggajian' => 'required|integer',
+            ]);
+
+            $penggajian = Penggajian::find($request['id_penggajian']);
+
+            if(!$penggajian){
+                return response()->json(['message' => 'Data not found'], 404);
+            }
+
+            $penggajian->delete();
+
+            return response()->json(['message' => 'Data deleted successfully'], 200);
         } catch (Exception $e) {
             //throw $th;`
             return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
