@@ -24,14 +24,14 @@ class AdminPegawaiController extends Controller
             // get all pegawai
             $allPegawai = Pegawai::select('*')->get()->map(function ($pegawai){
                 $pegawai = collect($pegawai)->except('foto_profil');
-                $pegawai['foto_profil'] = "admin/pegawai/image/" . $pegawai['id_pegawai'];
+                $pegawai['foto_profil'] = "/admin/pegawai/image/" . $pegawai['id_pegawai'];
                 return $pegawai;
             });
             return response()->json($allPegawai, 200);
         }else{
             // get pegawai by id
             $pegawai = Pegawai::find($request['id_pegawai']);
-            $pegawai['foto_profil'] = "admin/pegawai/image/" . $pegawai['id_pegawai'];
+            $pegawai['foto_profil'] = "/admin/pegawai/image/" . $pegawai['id_pegawai'];
             return response()->json($pegawai, 200);
         }
     }
@@ -54,10 +54,6 @@ class AdminPegawaiController extends Controller
             $img->fit(250, 250);
             $imageData = $img->encode();
 
-            // Simpan BLOB ke kolom 'foto_profil' di tabel 'Pegawai' dengan ID 1
-            // DB::table('pegawai')
-            //     ->where('id_pegawai', $request['id_pegawai'])
-            //     ->update(['foto_profil' => $imageData]);
             $newPegawai = new Pegawai();
             $newPegawai['id_user'] = $request['id_user'];
             $newPegawai['alamat_pegawai'] = $request['alamat_pegawai'];
@@ -66,7 +62,7 @@ class AdminPegawaiController extends Controller
             $newPegawai['id_divisi'] = $request['id_divisi'];
             $newPegawai['foto_profil'] = $imageData;
             $newPegawai->save();
-            $newPegawai['foto_profil'] = "admin/pegawai/image/". $newPegawai['id_pegawai'];
+            $newPegawai['foto_profil'] = "/admin/pegawai/image/". $newPegawai['id_pegawai'];
 
             return response($newPegawai, Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -75,6 +71,46 @@ class AdminPegawaiController extends Controller
         }
     }
 
+    public function updatePegawai(Request $request){
+        try {
+            $this->validate($request, [
+                'id_pegawai' => 'required|integer',
+                'foto_profil' => 'required|file|mimes:jpg,png,jpeg,gif,svg|max:10000',
+                'alamat_pegawai' => 'required|string|max:250',
+                'nohp_pegawai' => 'required|string|max:14',
+                'nip' => 'required|string|max:20',
+                'id_divisi' => 'required|integer'
+            ]);
+
+            $pegawai = Pegawai::find($request['id_pegawai']);
+            if(!$pegawai){
+                return response()->json(['message' => 'Data not found'], 404);
+            }
+
+            $pegawai['alamat_pegawai'] = $request['alamat_pegawai'];
+            $pegawai['nohp_pegawai'] = $request['nohp_pegawai'];
+            $pegawai['nip'] = $request['nip'];
+            $pegawai['id_divisi'] = $request['id_divisi'];
+
+            $image = $request->file('foto_profil');
+            $img = Image::make($image->getRealPath());
+
+            // Menyesuaikan ukuran gambar ke ukuran tetap
+            $img->fit(250, 250);
+            $imageData = $img->encode();
+
+            $pegawai['foto_profil'] = $imageData;
+
+            $pegawai->save();
+
+            $pegawai['foto_profil'] = '/admin/pegawai/image/'. $pegawai['id_pegawai'];
+
+            return response()->json($pegawai, 200);
+        } catch (Exception $e) {
+            //throw $th;`
+            return response("Gagal: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
     public function getPhotoByPegawaiId($pegawaiId)
     {
         $pegawai = Pegawai::find($pegawaiId);

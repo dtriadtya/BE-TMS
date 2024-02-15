@@ -73,6 +73,7 @@ Route::prefix('admin')->group(function() {
         Route::controller(AdminPegawaiController::class)->group(function(){
             Route::post('', 'getPegawai');
             Route::post('/add', 'addPegawai');
+            Route::post('/update', 'updatePegawai');
             Route::get('/image/{id}', 'getPhotoByPegawaiId');
         });
     });
