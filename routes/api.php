@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminCutiController;
 use App\Http\Controllers\Admin\AdminPegawaiController;
 use App\Http\Controllers\Admin\AdminPenggajianController;
+use App\Http\Controllers\Admin\AdminPresensiController;
 use App\Http\Controllers\Admin\AdminReimburseController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\PegawaiController;
@@ -96,6 +98,21 @@ Route::prefix('admin')->group(function() {
             Route::post('/update', 'updateReimburse');
             Route::post('/remove', 'removeReimburse');
             Route::get('/image/{id}', 'showLampiranById');
+        });
+    });
+
+    Route::prefix('cuti')->group(function(){
+        Route::controller(AdminCutiController::class)->group(function(){
+            Route::post('', 'getCuti');
+            Route::post('/add', 'addCuti');
+            Route::post('/update', 'updateCuti');
+        });
+    });
+
+    Route::prefix('presensi')->group(function(){
+        Route::controller(AdminPresensiController::class)->group(function(){
+            Route::post('', 'getPresensi');
+            Route::post('/update', 'updatePresensi');
         });
     });
 });

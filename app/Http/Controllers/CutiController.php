@@ -47,7 +47,7 @@ class CutiController extends Controller {
     $cuti = Cuti::where("id_user", $userId)->first();
     $user = User::find($userId);
     $latestCuti = Cuti::where("id_user", $userId)->where("status_cuti", "DISETUJUI")->latest('tgl_mulai')->first();
-    
+
     if ($cuti == null || $latestCuti == null) {
       return response()->json([
         'sisa_cuti' => 10,
@@ -84,9 +84,13 @@ class CutiController extends Controller {
       'jenis_cuti' => 'required',
       'keterangan' => 'required',
     ]);
-    
+
     try {
-      $newCuti = Cuti::create([
+        $latestCuti = Cuti::where("id_user", $request->id_user)->where("status_cuti", "DISETUJUI")->latest('tgl_mulai')->first();
+        if($latestCuti['status_cuti'] == "PENDING"){
+            return response()->json(["message" => "Tunggu hingga persetujuan Cuti sebelumnya"]);
+        }
+        $newCuti = Cuti::create([
         'id_user' => $request->id_user,
         'tgl_mulai' => $request->tgl_mulai,
         'tgl_akhir' => $request->tgl_akhir,
@@ -106,7 +110,7 @@ class CutiController extends Controller {
   {
     try {
       $cuti = Cuti::find($cutiId);
-      
+
       if ($cuti == null) {
         return response()->json(["message" => "Cuti tidak ditemukan"], 404);
       }
@@ -129,7 +133,7 @@ class CutiController extends Controller {
   {
     try {
       $cuti = Cuti::find($cutiId);
-      
+
       if ($cuti == null) {
         return response()->json(["message" => "Cuti tidak ditemukan"], 404);
       }
