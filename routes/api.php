@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminPegawaiController;
 use App\Http\Controllers\Admin\AdminPenggajianController;
+use App\Http\Controllers\Admin\AdminReimburseController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PenggajianController;
@@ -85,6 +86,16 @@ Route::prefix('admin')->group(function() {
             Route::post('', 'getPenggajian');
             Route::post('/add', 'addPenggajian');
             Route::post('/remove', 'removePenggajian');
+        });
+    });
+
+    Route::prefix('reimburse')->group(function(){
+        Route::controller(AdminReimburseController::class)->group(function(){
+            Route::post('', 'getReimburse');
+            Route::post('/add', 'addReimburse');
+            Route::post('/update', 'updateReimburse');
+            Route::post('/remove', 'removeReimburse');
+            Route::get('/image/{id}', 'showLampiranById');
         });
     });
 });
