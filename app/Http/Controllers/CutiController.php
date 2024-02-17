@@ -86,19 +86,48 @@ class CutiController extends Controller {
     ]);
 
     try {
-        $latestCuti = Cuti::where("id_user", $request->id_user)->where("status_cuti", "DISETUJUI")->latest('tgl_mulai')->first();
-        if($latestCuti['status_cuti'] == "PENDING"){
-            return response()->json(["message" => "Tunggu hingga persetujuan Cuti sebelumnya"]);
+        $year = Carbon::now()->year;
+        $latestCuti = Cuti::where("id_user", $request['id_user'])
+                        ->whereYear('tgl_mulai', $year)
+                        ->latest('tgl_mulai')
+                        ->orderByDesc('tgl_mulai')
+                        ->orderByDesc('id_cuti')
+                        ->first();
+        if($latestCuti != null){
+            if($latestCuti['status_cuti'] == "PENDING"){
+                return response()->json(["message" => "Tunggu hingga persetujuan Cuti sebelumnya"],400);
+            }
+            if($latestCuti['sisa_cuti'] == 0){
+                return response()->json(["message" => "Anda sudah mencapai batas Cuti Anda."],400);
+            }
         }
-        $newCuti = Cuti::create([
-        'id_user' => $request->id_user,
-        'tgl_mulai' => $request->tgl_mulai,
-        'tgl_akhir' => $request->tgl_akhir,
-        'jenis_cuti' => $request->jenis_cuti,
-        'keterangan' => $request->keterangan,
-        'sisa_cuti' => null,
-        'status_cuti' => 'PENDING',
-      ]);
+        $newCuti = new Cuti();
+        $newCuti['id_user'] = $request['id_user'];
+        $newCuti['tgl_mulai'] = $request['tgl_mulai'];
+        $newCuti['tgl_akhir'] = $request['tgl_akhir'];
+        $newCuti['jenis_cuti'] = $request['jenis_cuti'];
+        $newCuti['keterangan'] = $request['keterangan'];
+        $newCuti['status_cuti'] = "PENDING";
+        $newCuti['id_admin'] = $request['id_admin'];
+
+        if($latestCuti == null){
+            $newCuti['sisa_cuti'] = 10;
+        }else{
+            $tanggal_mulai = new DateTime($request['tgl_mulai']);
+            $tanggal_akhir = new DateTime($request['tgl_akhir']);
+            $jumlahRequestCuti = $tanggal_mulai->diff($tanggal_akhir)->days + 1;
+            if($latestCuti['status_cuti'] == 'DISETUJUI'){
+                $sisa = $latestCuti['sisa_cuti'] - $jumlahRequestCuti;
+            }else{
+                $sisa = $latestCuti['sisa_cuti'];
+            }
+            if($sisa < 0){
+                return response()->json(["message" => "Anda melebihi batas Cuti Anda."],400);
+            }
+            $newCuti['sisa_cuti'] = $latestCuti['sisa_cuti'];
+        }
+
+        $newCuti->save();
       $newCuti['message'] = "Berhasil menambahkan cuti";
       return response()->json($newCuti, 201);
     }catch(Exception $ex){
