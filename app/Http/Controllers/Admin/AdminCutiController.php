@@ -55,7 +55,7 @@ class AdminCutiController extends Controller {
                             ->orderByDesc('tgl_mulai')
                             ->orderByDesc('id_cuti')
                             ->first();
-            error_log($latestCuti);
+
             if($latestCuti != null){
                 if($latestCuti['status_cuti'] == "PENDING"){
                     return response()->json(["message" => "Tunggu hingga persetujuan Cuti sebelumnya"],400);
@@ -64,7 +64,7 @@ class AdminCutiController extends Controller {
                     return response()->json(["message" => "Anda sudah mencapai batas Cuti Anda."],400);
                 }
             }
-            error_log("test");
+
             $newCuti = new Cuti();
             $newCuti['id_user'] = $request['id_user'];
             $newCuti['tgl_mulai'] = $request['tgl_mulai'];
@@ -88,7 +88,7 @@ class AdminCutiController extends Controller {
                 if($sisa < 0){
                     return response()->json(["message" => "Anda melebihi batas Cuti Anda."],400);
                 }
-                $newCuti['sisa_cuti'] = $sisa;
+                $newCuti['sisa_cuti'] = $latestCuti['sisa_cuti'];
             }
 
             $newCuti->save();
@@ -106,7 +106,6 @@ class AdminCutiController extends Controller {
                     'required',
                     Rule::in(['DISETUJUI', 'PENDING', 'DITOLAK']),
                 ],
-                'sisa_cuti' => 'string|required',
                 'id_admin' => 'integer|required',
                 'id_cuti' => 'integer|required'
             ]);
@@ -117,7 +116,13 @@ class AdminCutiController extends Controller {
 
             $cuti['status_cuti'] = $request['status_cuti'];
             $cuti['id_admin'] = $request['id_admin'];
-            $cuti['sisa_cuti'] = $request['sisa_cuti'];
+
+            if($request['status_cuti'] == 'DISETUJUI'){
+                $tanggal_mulai = new DateTime($cuti['tgl_mulai']);
+                $tanggal_akhir = new DateTime($cuti['tgl_akhir']);
+                $jumlahRequestCuti = $tanggal_mulai->diff($tanggal_akhir)->days + 1;
+                $cuti['sisa_cuti'] = $cuti['sisa_cuti'] - $jumlahRequestCuti;
+            }
 
             $cuti->save();
 
@@ -127,3 +132,16 @@ class AdminCutiController extends Controller {
         }
     }
 }
+
+// $tanggal_mulai = new DateTime($request['tgl_mulai']);
+//                 $tanggal_akhir = new DateTime($request['tgl_akhir']);
+//                 $jumlahRequestCuti = $tanggal_mulai->diff($tanggal_akhir)->days + 1;
+//                 if($latestCuti['status_cuti'] == 'DISETUJUI'){
+//                     $sisa = $latestCuti['sisa_cuti'] - $jumlahRequestCuti;
+//                 }else{
+//                     $sisa = $latestCuti['sisa_cuti'];
+//                 }
+//                 if($sisa < 0){
+//                     return response()->json(["message" => "Anda melebihi batas Cuti Anda."],400);
+//                 }
+//                 $newCuti['sisa_cuti'] = $sisa;

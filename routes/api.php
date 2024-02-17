@@ -112,6 +112,7 @@ Route::prefix('admin')->group(function() {
     Route::prefix('presensi')->group(function(){
         Route::controller(AdminPresensiController::class)->group(function(){
             Route::post('', 'getPresensi');
+            Route::post('/add', 'addPresensi');
             Route::post('/update', 'updatePresensi');
         });
     });
